@@ -3,17 +3,18 @@
 #	copyright (2015) Zachary King
 #	Pyrite
 #	Beta v1.0.2
-###
+##
+
+
 
 import wx
 import wx.lib.dialogs
 import wx.stc as stc
 import keyword
 import os
-from xml.dom.minidom import parse
-import xml.dom.minidom
 
-# Font face data depending on OS
+
+# test comment
 if wx.Platform == '__WXMSW__':
     faces = { 'times': 'Times New Roman',
               'mono' : 'Courier New',
@@ -39,43 +40,29 @@ else:
               'size2': 10,
              }
 
-# Application Framework
 class MainWindow(wx.Frame):
 	def __init__(self, parent, title):
-		# variables for file i/o
 		self.dirname = ''
 		self.filename = ''
-		self.normalStylesFore = dict()
-		self.normalStylesBack = dict()
-		self.pythonStylesFore = dict()
-		self.pythonStylesBack = dict()
-
-		# editor options
 		self.foldSymbols = 2
 		self.lineNumbersEnabled = True
 		self.leftMarginWidth = 25
 
-		# Initialize the application Frame and create the Styled Text Control
 		wx.Frame.__init__(self, parent, title=title, size=(800, 600))
 		self.control = stc.StyledTextCtrl(self, style=wx.TE_MULTILINE | wx.TE_WORDWRAP)
 
-		# Bind Ctrl + '=' and Ctrl + '-' to zooming in and out or making the text bigger/smaller
 		self.control.CmdKeyAssign(ord('='), stc.STC_SCMOD_CTRL, stc.STC_CMD_ZOOMIN) # Ctrl + = to zoom in
 		self.control.CmdKeyAssign(ord('-'), stc.STC_SCMOD_CTRL, stc.STC_CMD_ZOOMOUT) # Ctrl + - to zoom out
-
-		# Set up the Python keywords for syntax highlighting
 		self.control.SetLexer(stc.STC_LEX_PYTHON)
 		self.control.SetKeyWords(0, " ".join(keyword.kwlist))
-
-		# Set some properties of the text control
 		self.control.SetViewWhiteSpace(False)
 		self.control.SetProperty("fold", "1")
 		self.control.SetProperty("tab.timmy.whinge.level", "1")
-
-		# Set margins
-		self.control.SetMargins(5,0) # 5px margin on left inside of text control
+		self.control.SetMargins(0,0)
 		self.control.SetMarginType(1, stc.STC_MARGIN_NUMBER) # line numbers column
-		self.control.SetMarginWidth(1, self.leftMarginWidth) # width of line numbers column
+		self.control.SetMarginWidth(1, self.leftMarginWidth)
+		self.control.SetEdgeMode(stc.STC_EDGE_BACKGROUND)
+		self.control.SetEdgeColumn(78)
 
 		if self.foldSymbols == 0:
 			# Arrow pointing right for contracted folders, arrow pointing down for expanded
@@ -83,9 +70,9 @@ class MainWindow(wx.Frame):
 			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDER,        stc.STC_MARK_ARROW, "black", "black")
 			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDERSUB,     stc.STC_MARK_EMPTY, "black", "black")
 			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDERTAIL,    stc.STC_MARK_EMPTY, "black", "black")
-			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDEREND,     stc.STC_MARK_EMPTY, "white", "black")
-			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDEROPENMID, stc.STC_MARK_EMPTY, "white", "black")
-			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL, stc.STC_MARK_EMPTY, "white", "black")
+			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDEREND,     stc.STC_MARK_EMPTY,     "white", "black")
+			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDEROPENMID, stc.STC_MARK_EMPTY,     "white", "black")
+			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL, stc.STC_MARK_EMPTY,     "white", "black")
 
 		elif self.foldSymbols == 1:
 			# Plus for contracted folders, minus for expanded
@@ -119,7 +106,7 @@ class MainWindow(wx.Frame):
 
 		# Create the status bar at the bottom
 		self.CreateStatusBar()
-		self.UpdateLineCol(self) # show the line #, row # in status bar
+		self.UpdateLineCol(self)
 		self.StatusBar.SetBackgroundColour((220,220,220))
 
 		# Setting up the file menu
@@ -189,7 +176,6 @@ class MainWindow(wx.Frame):
 		self.control.Bind(wx.EVT_KEY_DOWN, self.OnKeyPressed)
 		self.control.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
 
-		# go ahead and display the application
 		self.Show()
 
 		# defaulting the style
@@ -203,66 +189,157 @@ class MainWindow(wx.Frame):
 		self.control.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:#FFFFFF,back:#0000FF,bold")
 		self.control.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:#000000,back:#FF0000,bold")
 
-		# Set all the theme settings
-		self.ReadThemeSettings()
-		self.ParseSettings("settings.xml")
-		self.SetStyling()
-
-	# Setting the styles
-	def SetStyling(self):
-		pSFore = self.pythonStylesFore
-		pSBack = self.pythonStylesBack
-		nSFore = self.normalStylesFore
-		nSBack = self.normalStylesBack
 		# Python styles
-		self.control.StyleSetBackground(stc.STC_STYLE_DEFAULT, nSBack["Main"])
-		self.control.SetSelBackground(True, "#333333")
 		# Default
-		self.control.StyleSetSpec(stc.STC_P_DEFAULT, "fore:%s,back:%s" % (pSFore["Default"], pSBack["Default"]))
-		self.control.StyleSetSpec(stc.STC_P_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_DEFAULT, "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
 		# Comments
-		self.control.StyleSetSpec(stc.STC_P_COMMENTLINE, "fore:%s,back:%s" % (pSFore["Comment"], pSBack["Comment"]))
-		self.control.StyleSetSpec(stc.STC_P_COMMENTLINE, "face:%(other)s,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_COMMENTLINE, "fore:#007F00,face:%(other)s,size:%(size)d" % faces)
 		# Number
-		self.control.StyleSetSpec(stc.STC_P_NUMBER, "fore:%s,back:%s" % (pSFore["Number"], pSBack["Number"]))
-		self.control.StyleSetSpec(stc.STC_P_NUMBER, "size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_NUMBER, "fore:#007F7F,size:%(size)d" % faces)
 		# String
-		self.control.StyleSetSpec(stc.STC_P_STRING, "fore:%s,back:%s" % (pSFore["String"], pSBack["Number"]))
-		self.control.StyleSetSpec(stc.STC_P_STRING, "face:%(helv)s,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_STRING, "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
 		# Single-quoted string
-		self.control.StyleSetSpec(stc.STC_P_CHARACTER, "fore:%s,back:%s" % (pSFore["SingleQuoteString"], pSBack["SingleQuoteString"]))
-		self.control.StyleSetSpec(stc.STC_P_CHARACTER, "face:%(helv)s,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_CHARACTER, "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
 		# Keyword
-		self.control.StyleSetSpec(stc.STC_P_WORD, "fore:%s,back:%s" % (pSFore["Keyword"], pSBack["Keyword"]))
-		self.control.StyleSetSpec(stc.STC_P_WORD, "bold,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_WORD, "fore:#00007F,bold,size:%(size)d" % faces)
 		# Triple quotes
-		self.control.StyleSetSpec(stc.STC_P_TRIPLE, "fore:%s,back:%s" % (pSFore["TripleQuote"], pSBack["TripleQuote"]))
-		self.control.StyleSetSpec(stc.STC_P_TRIPLE, "size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_TRIPLE, "fore:#7F0000,size:%(size)d" % faces)
 		# Triple double quotes
-		self.control.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, "fore:%s,back:%s" % (pSFore["TripleDoubleQuote"], pSBack["TripleDoubleQuote"]))
-		self.control.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, "size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, "fore:#7F0000,size:%(size)d" % faces)
 		# Class name definition
-		self.control.StyleSetSpec(stc.STC_P_CLASSNAME, "fore:%s,back:%s" % (pSFore["ClassName"], pSBack["ClassName"]))
-		self.control.StyleSetSpec(stc.STC_P_CLASSNAME, "bold,underline,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_CLASSNAME, "fore:#0000FF,bold,underline,size:%(size)d" % faces)
 		# Function name definition
-		self.control.StyleSetSpec(stc.STC_P_DEFNAME, "fore:%s,back:%s" % (pSFore["FunctionName"], pSBack["FunctionName"]))
-		self.control.StyleSetSpec(stc.STC_P_DEFNAME, "bold,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_DEFNAME, "fore:#007F7F,bold,size:%(size)d" % faces)
 		# Operators
-		self.control.StyleSetSpec(stc.STC_P_OPERATOR, "fore:%s,back:%s" % (pSFore["Operator"], pSBack["Operator"]))
 		self.control.StyleSetSpec(stc.STC_P_OPERATOR, "bold,size:%(size)d" % faces)
 		# Identifiers
-		self.control.StyleSetSpec(stc.STC_P_IDENTIFIER, "fore:%s,back:%s" % (pSFore["Identifier"], pSBack["Identifier"]))
-		self.control.StyleSetSpec(stc.STC_P_IDENTIFIER, "face:%(helv)s,size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_IDENTIFIER, "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
 		# Comment blocks
-		self.control.StyleSetSpec(stc.STC_P_COMMENTBLOCK, "fore:%s,back:%s" % (pSFore["CommentBlock"], pSBack["CommentBlock"]))
-		self.control.StyleSetSpec(stc.STC_P_COMMENTBLOCK, "size:%(size)d" % faces)
+		self.control.StyleSetSpec(stc.STC_P_COMMENTBLOCK, "fore:#7F7F7F,size:%(size)d" % faces)
 		# End of line where string is not closed
-		self.control.StyleSetSpec(stc.STC_P_STRINGEOL, "fore:%s,back:%s" % (pSFore["StringEOL"], pSBack["StringEOL"]))
-		self.control.StyleSetSpec(stc.STC_P_STRINGEOL, "face:%(mono)s,eol,size:%(size)d" % faces)
-		# Caret/Insertion Point
-		self.control.SetCaretForeground(pSFore["Caret"])
-		self.control.SetCaretLineBackground(pSBack["CaretLine"])
-		self.control.SetCaretLineVisible(True)
+		self.control.StyleSetSpec(stc.STC_P_STRINGEOL, "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d" % faces)
+
+		self.control.SetCaretForeground("BLUE")
+
+	def OnUpdateUI(self, e):
+		# check for matching braces
+		braceAtCaret = -1
+		braceOpposite = -1
+		charBefore = None
+		caretPos = self.control.GetCurrentPos()
+
+		if (caretPos > 0):
+			charBefore = self.control.GetCharAt(caretPos - 1)
+			styleBefore = self.control.GetStyleAt(caretPos - 1)
+
+		# check before
+		if (charBefore and chr(charBefore) in "[]{}()" and styleBefore == stc.STC_P_OPERATOR):
+			braceAtCaret = caretPos - 1
+
+		# check after
+		if (braceAtCaret < 0):
+			charAfter = self.control.GetCharAt(caretPos)
+			styleAfter = self.control.GetStyleAt(caretPos)
+
+			if (charAfter and chr(charAfter) in "[]{}()" and styleAfter == stc.STC_P_OPERATOR):
+				braceAtCaret = caretPos
+
+		if (braceAtCaret >= 0):
+			braceOpposite = self.control.BraceMatch(braceAtCaret)
+
+		if (braceAtCaret != -1 and braceOpposite == -1):
+			self.control.BraceBadLight(braceAtCaret)
+		else:
+			self.control.BraceHighlight(braceAtCaret,braceOpposite) 
+
+	def OnMarginClick(self, e):
+		# fold and unfold as needed
+		if (e.GetMargin() == 2):
+			if (e.GetShift() and e.GetControl()):
+				self.control.FoldAll()
+			else:
+				lineClicked = self.control.LineFromPosition(e.GetPosition())
+
+				if (self.control.GetFoldLevel(lineClicked) & stc.STC_P_FOLDLEVELHEADERFLAG):
+					if (e.GetShift()):
+						self.control.SetFoldExpanded(lineClicked, True)
+						self.control.Expand(lineClicked, True, True, -1)
+					elif (e.GetControl()):
+						if (self.control.GetFoldExpaned(lineClicked)):
+							self.control.SetFoldExpanded(lineClicked, False)
+							self.control.Expand(lineClicked, False, True, 0)
+						else:
+							self.control.SetFoldExpanded(lineClicked, True)
+							self.control.Expand(lineClicked, True, True, 100)
+					else:
+						self.control.ToggleFold(lineClicked)
+
+	def FoldAll(self):
+		lineCount = self.control.GetLineCount()
+		expanding = True
+
+		# find out if we are folding or unfolding
+		for lineNum in range(lineCount):
+			if self.GetFoldLevel(lineNum) & stc.STC_FOLDLEVELHEADERFLAG:
+				expanding = not self.GetFoldExpanded(lineNum)
+				break
+
+		lineNum = 0
+
+		while lineNum < lineCount:
+			level = self.GetFoldLevel(lineNum)
+			if level & stc.STC_FOLDLEVELHEADERFLAG and \
+				(level & stc.STC_FOLDLEVELNUMBERMASK) == stc.STC_FOLDLEVELBASE:
+
+				if expanding:
+					self.SetFoldExpanded(lineNum, True)
+					lineNum = self.Expand(lineNum, True)
+					lineNum = lineNum - 1
+				else:
+					lastChild = self.GetLastChild(lineNum, -1)
+					self.SetFoldExpanded(lineNum, False)
+
+					if lastChild > lineNum:
+						self.HideLines(lineNum+1, lastChild)
+
+		lineNum = lineNum + 1
+
+
+	def Expand(self, line, doExpand, force=False, visLevels=0, level=-1):
+		lastChild = self.GetLastChild(line, level)
+		line = line + 1
+
+		while line <= lastChild:
+			if force:
+				if visLevels > 0:
+					self.ShowLines(line, line)
+				else:
+					self.HideLines(line, line)
+			else:
+				if doExpand:
+					self.ShowLines(line, line)
+
+			if level == -1:
+				level = self.GetFoldLevel(line)
+
+			if level & stc.STC_FOLDLEVELHEADERFLAG:
+				if force:
+					if visLevels > 1:
+						self.SetFoldExpanded(line, True)
+					else:
+						self.SetFoldExpanded(line, False)
+
+					line = self.Expand(line, doExpand, force, visLevels-1)
+
+				else:
+					if doExpand and self.GetFoldExpanded(line):
+						line = self.Expand(line, True, force, visLevels-1)
+					else:
+						line = self.Expand(line, False, force, visLevels-1)
+			else:
+				line = line + 1
+
+		return line
 
 	# New document
 	def OnNew(self, e):
@@ -410,126 +487,6 @@ class MainWindow(wx.Frame):
 		else:
 			e.Skip()
 
-	def OnUpdateUI(self, e):
-		# check for matching braces
-		braceAtCaret = -1
-		braceOpposite = -1
-		charBefore = None
-		caretPos = self.control.GetCurrentPos()
-
-		if (caretPos > 0):
-			charBefore = self.control.GetCharAt(caretPos - 1)
-			styleBefore = self.control.GetStyleAt(caretPos - 1)
-
-		# check before
-		if (charBefore and chr(charBefore) in "[]{}()" and styleBefore == stc.STC_P_OPERATOR):
-			braceAtCaret = caretPos - 1
-
-		# check after
-		if (braceAtCaret < 0):
-			charAfter = self.control.GetCharAt(caretPos)
-			styleAfter = self.control.GetStyleAt(caretPos)
-
-			if (charAfter and chr(charAfter) in "[]{}()" and styleAfter == stc.STC_P_OPERATOR):
-				braceAtCaret = caretPos
-
-		if (braceAtCaret >= 0):
-			braceOpposite = self.control.BraceMatch(braceAtCaret)
-
-		if (braceAtCaret != -1 and braceOpposite == -1):
-			self.control.BraceBadLight(braceAtCaret)
-		else:
-			self.control.BraceHighlight(braceAtCaret,braceOpposite) 
-
-	def OnMarginClick(self, e):
-		# fold and unfold as needed
-		if (e.GetMargin() == 2):
-			if (e.GetShift() and e.GetControl()):
-				self.control.FoldAll()
-			else:
-				lineClicked = self.control.LineFromPosition(e.GetPosition())
-
-				if (self.control.GetFoldLevel(lineClicked) & stc.STC_P_FOLDLEVELHEADERFLAG):
-					if (e.GetShift()):
-						self.control.SetFoldExpanded(lineClicked, True)
-						self.control.Expand(lineClicked, True, True, -1)
-					elif (e.GetControl()):
-						if (self.control.GetFoldExpaned(lineClicked)):
-							self.control.SetFoldExpanded(lineClicked, False)
-							self.control.Expand(lineClicked, False, True, 0)
-						else:
-							self.control.SetFoldExpanded(lineClicked, True)
-							self.control.Expand(lineClicked, True, True, 100)
-					else:
-						self.control.ToggleFold(lineClicked)
-
-	def FoldAll(self):
-		lineCount = self.control.GetLineCount()
-		expanding = True
-
-		# find out if we are folding or unfolding
-		for lineNum in range(lineCount):
-			if self.GetFoldLevel(lineNum) & stc.STC_FOLDLEVELHEADERFLAG:
-				expanding = not self.GetFoldExpanded(lineNum)
-				break
-
-		lineNum = 0
-
-		while lineNum < lineCount:
-			level = self.GetFoldLevel(lineNum)
-			if level & stc.STC_FOLDLEVELHEADERFLAG and \
-				(level & stc.STC_FOLDLEVELNUMBERMASK) == stc.STC_FOLDLEVELBASE:
-
-				if expanding:
-					self.SetFoldExpanded(lineNum, True)
-					lineNum = self.Expand(lineNum, True)
-					lineNum = lineNum - 1
-				else:
-					lastChild = self.GetLastChild(lineNum, -1)
-					self.SetFoldExpanded(lineNum, False)
-
-					if lastChild > lineNum:
-						self.HideLines(lineNum+1, lastChild)
-
-		lineNum = lineNum + 1
-
-
-	def Expand(self, line, doExpand, force=False, visLevels=0, level=-1):
-		lastChild = self.GetLastChild(line, level)
-		line = line + 1
-
-		while line <= lastChild:
-			if force:
-				if visLevels > 0:
-					self.ShowLines(line, line)
-				else:
-					self.HideLines(line, line)
-			else:
-				if doExpand:
-					self.ShowLines(line, line)
-
-			if level == -1:
-				level = self.GetFoldLevel(line)
-
-			if level & stc.STC_FOLDLEVELHEADERFLAG:
-				if force:
-					if visLevels > 1:
-						self.SetFoldExpanded(line, True)
-					else:
-						self.SetFoldExpanded(line, False)
-
-					line = self.Expand(line, doExpand, force, visLevels-1)
-
-				else:
-					if doExpand and self.GetFoldExpanded(line):
-						line = self.Expand(line, True, force, visLevels-1)
-					else:
-						line = self.Expand(line, False, force, visLevels-1)
-			else:
-				line = line + 1
-
-		return line
-
 	# Key *press* event bindings
 	def OnKeyPressed(self, e):
 		# if the tip is already up, hide it
@@ -554,107 +511,6 @@ class MainWindow(wx.Frame):
 		else:
 			e.Skip()
 
-	def ParseSettings(self, settings_file):
-		"""Parses an XML settings file for styling and configuring the text editor"""
-		# Open XML document using minidom parser
-		DOMTree = xml.dom.minidom.parse(settings_file)
-		collection = DOMTree.documentElement # Root element
-		
-		# Get all the styles in the collection
-		styles = collection.getElementsByTagName("style")
-		for s in styles:
-			item = s.getElementsByTagName("item")[0].childNodes[0].data
-			color = s.getElementsByTagName("color")[0].childNodes[0].data
-			side = s.getElementsByTagName("side")[0].childNodes[0].data
-			sType = s.getAttribute("type")
-			if sType == "normal":
-				if side == "Back": # background
-					self.normalStylesBack[str(item)] = str(color)
-				else:
-					self.normalStylesFore[str(item)] = str(color)
-			elif sType == "python":
-				if side == "Back":
-					self.pythonStylesBack[str(item)] = str(color)
-				else:
-					self.pythonStylesFore[str(item)] = str(color)
-
-	# Read in theme settings
-	def ReadThemeSettings(self):
-		try:
-			f = open("theme.dat", "r")
-			self.styleBackColor=f.readline().split("=")[1]
-			self.styleSelBackColor=f.readline().split("=")[1]
-			self.styleLineNumberBackColor=f.readline().split("=")[1]
-			self.styleBracelightForeColor=f.readline().split("=")[1]
-			self.styleBraceLightBackColor=f.readline().split("=")[1]
-			self.styleBraceBadForeColor=f.readline().split("=")[1]
-			self.styleBraceBadBackColor=f.readline().split("=")[1]
-			self.pStyleDefaultForeColor=f.readline().split("=")[1]
-			self.pStyleDefaultBackColor=f.readline().split("=")[1]
-			self.pSytleCommentForeColor=f.readline().split("=")[1]
-			self.pStyleCommentBackColor=f.readline().split("=")[1]
-			self.pStyleNumberForeColor=f.readline().split("=")[1]
-			self.pStyleNumberBackColor=f.readline().split("=")[1]
-			self.pStyleStringForeColor=f.readline().split("=")[1]
-			self.pStyleStringBackColor=f.readline().split("=")[1]
-			self.pStyleSingleQuoteStringForeColor=f.readline().split("=")[1]
-			self.pStyleSingleQuoteStringBackColor=f.readline().split("=")[1]
-			self.pStyleKeywordForeColor=f.readline().split("=")[1]
-			self.pStyleKeywordBackColor=f.readline().split("=")[1]
-			self.pStyleTripleQuoteForeColor=f.readline().split("=")[1]
-			self.pStyleTripleQuoteBackColor=f.readline().split("=")[1]
-			self.pStyleTripleDoubleForeColor=f.readline().split("=")[1]
-			self.pStyleTripleDoubleBackColor=f.readline().split("=")[1]
-			self.pStyleClassNameForeColor=f.readline().split("=")[1]
-			self.pStyleClassNameBackColor=f.readline().split("=")[1]
-			self.pStyleFunctionNameForeColor=f.readline().split("=")[1]
-			self.pStyleFunctionNameBackColor=f.readline().split("=")[1]
-			self.pStyleOperatorForeColor=f.readline().split("=")[1]
-			self.pStyleOperatorBackColor=f.readline().split("=")[1]
-			self.pStyleIdentifierForeColor=f.readline().split("=")[1]
-			self.pStyleIdentifierBackColor=f.readline().split("=")[1]
-			
-			self.pStyleCommentBlockForeColor=f.readline().split("=")[1]
-			self.pStyleCommentBlockBackColor=f.readline().split("=")[1]
-			self.pStyleStringEOLForeColor=f.readline().split("=")[1]
-			self.pStyleStringEOLBackColor=f.readline().split("=")[1]
-			f.close()
-		except:
-			self.styleBackColor="#000000"
-			self.styleSelBackColor="#333333"
-			self.styleLineNumberBackColor="#000000"
-			self.styleBracelightForeColor="#000000"
-			self.styleBraceLightBackColor="#000000"
-			self.styleBraceBadForeColor="#000000"
-			self.styleBraceBadBackColor="#000000"
-			self.pStyleDefaultForeColor="#000000"
-			self.pStyleDefaultBackColor="#000000"
-			self.pSytleCommentForeColor="#626C67"
-			self.pStyleCommentBackColor="#000000"
-			self.pStyleNumberForeColor="#FF3C41"
-			self.pStyleNumberBackColor="#000000"
-			self.pStyleStringForeColor="#00C677"
-			self.pStyleStringBackColor="#000000"
-			self.pStyleSingleQuoteStringForeColor="#00C677"
-			self.pStyleSingleQuoteStringBackColor="#000000"
-			self.pStyleKeywordForeColor="#FF3C41"
-			self.pStyleKeywordBackColor="#000000"
-			self.pStyleTripleQuoteForeColor="#00C677"
-			self.pStyleTripleQuoteBackColor="#000000"
-			self.pStyleTripleDoubleForeColor="#00C677"
-			self.pStyleTripleDoubleBackColor="#000000"
-			self.pStyleClassNameForeColor="#76F5E6"
-			self.pStyleClassNameBackColor="#000000"
-			self.pStyleFunctionNameForeColor="#00CACA"
-			self.pStyleFunctionNameBackColor="#000000"
-			self.pStyleOperatorForeColor="#FF3C41"
-			self.pStyleOperatorBackColor="#000000"
-			self.pStyleIdentifierForeColor="#FFFFFF"
-			self.pStyleIdentifierBackColor="#000000"
-			self.pStyleCommentBlockForeColor="#626C67"
-			self.pStyleCommentBlockBackColor="#000000"
-			self.pStyleStringEOLForeColor="#FFFFFF"
-			self.pStyleStringEOLBackColor="#000000"
 
 
 app = wx.App(False)
