@@ -205,7 +205,6 @@ class MainWindow(wx.Frame):
 		self.control.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:#000000,back:#FF0000,bold")
 
 		# Set all the theme settings
-		self.ReadThemeSettings()
 		self.ParseSettings("settings.xml")
 		self.SetStyling()
 
