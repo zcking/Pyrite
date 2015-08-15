@@ -1,0 +1,32 @@
+ How To Use Zach's Text Editor
+--------------------------------------
+--------------------------------------
+1) Creating a new file: File >> New
+
+2) Opening an existing file: File >> Open
+
+3) Save the current file: File >> Save
+
+4) Save as a new file: File >> Save As
+
+5) Close the application: File >> Close
+
+6) Select all text: Edit >> Select All
+
+7) Copy selected text: Edit >> Copy
+
+8) Cut selected text: Edit >> Cut
+
+9) Paste text from clipboard: Edit >> Paste
+
+10) Toggle line numbers: Preferences >> Toggle Line Numbers
+
+11) Show How to: really?
+
+12) Show information about the editor: Help >> About
+
+--------------------------------------
+Note: You can press the Alt key to access the menu bar 
+as a shortcut. Simply follow up your handy dandy key press
+ with the letter marked with an underscore for your choice.
+An example is to open a file: Alt >> F >> O

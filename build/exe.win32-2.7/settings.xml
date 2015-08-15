@@ -1,0 +1,197 @@
+<collection title="settings">
+	<!-- Normal Styles -->
+	<style type="normal">
+		<item>Main</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<!--
+	<style type="normal">
+		<item>Main</item>
+		<side>Fore</side>
+		<color>#FFFFFF</color>
+	</style>
+	-->
+	<style type="normal">
+		<item>Selection</item>
+		<side>Back</side>
+		<color>#333333</color>
+	</style>
+	<style type="normal">
+		<item>LineNumbers</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="normal">
+		<item>BraceLight</item>
+		<side>Fore</side>
+		<color>#000000</color>
+	</style>
+	<style type="normal">
+		<item>BraceLight</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="normal">
+		<item>BraceBad</item>
+		<side>Fore</side>
+		<color>#000000</color>
+	</style>
+	<style type="normal">
+		<item>BraceBad</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+
+	<!-- Python Styles -->
+	<style type="python">
+		<item>Default</item>
+		<side>Fore</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>Default</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>Comment</item>
+		<side>Fore</side>
+		<color>#626C67</color>
+	</style>
+	<style type="python">
+		<item>Comment</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>Number</item>
+		<side>Fore</side>
+		<color>#FF3C41</color>
+	</style>
+	<style type="python">
+		<item>Number</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>String</item>
+		<side>Fore</side>
+		<color>#00C677</color>
+	</style>
+	<style type="python">
+		<item>String</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>SingleQuoteString</item>
+		<side>Fore</side>
+		<color>#00C677</color>
+	</style>
+	<style type="python">
+		<item>SingleQuoteString</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>Keyword</item>
+		<side>Fore</side>
+		<color>#FF3C41</color>
+	</style>
+	<style type="python">
+		<item>Keyword</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>TripleQuote</item>
+		<side>Fore</side>
+		<color>#00C677</color>
+	</style>
+	<style type="python">
+		<item>TripleQuote</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>TripleDoubleQuote</item>
+		<side>Fore</side>
+		<color>#00C677</color>
+	</style>
+	<style type="python">
+		<item>TripleDoubleQuote</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>ClassName</item>
+		<side>Fore</side>
+		<color>#76F5E6</color>
+	</style>
+	<style type="python">
+		<item>ClassName</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>FunctionName</item>
+		<side>Fore</side>
+		<color>#00CACA</color>
+	</style>
+	<style type="python">
+		<item>FunctionName</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>Operator</item>
+		<side>Fore</side>
+		<color>#FF3C41</color>
+	</style>
+	<style type="python">
+		<item>Operator</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>Identifier</item>
+		<side>Fore</side>
+		<color>#FFFFFF</color>
+	</style>
+	<style type="python">
+		<item>Identifier</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>CommentBlock</item>
+		<side>Fore</side>
+		<color>#626C67</color>
+	</style>
+	<style type="python">
+		<item>CommentBlock</item>
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>StringEOL</item> <!-- End of Line String -->
+		<side>Fore</side>
+		<color>#FFFFFF</color>
+	</style>
+	<style type="python">
+		<item>StringEOL</item> <!-- End of Line String -->
+		<side>Back</side>
+		<color>#000000</color>
+	</style>
+	<style type="python">
+		<item>Caret</item>
+		<side>Fore</side>
+		<color>#FFFFFF</color>
+	</style>
+	<style type="python">
+		<item>CaretLine</item>
+		<side>Back</side>
+		<color>#111111</color>
+	</style>
+</collection>
