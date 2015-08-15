@@ -77,6 +77,7 @@ class MainWindow(wx.Frame):
 		self.control.SetMarginType(1, stc.STC_MARGIN_NUMBER) # line numbers column
 		self.control.SetMarginWidth(1, self.leftMarginWidth) # width of line numbers column
 
+		# Set foldSymbols style based off the instance variable self.foldSymbols
 		if self.foldSymbols == 0:
 			# Arrow pointing right for contracted folders, arrow pointing down for expanded
 			self.control.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN,    stc.STC_MARK_ARROWDOWN, "black", "black")
@@ -204,74 +205,91 @@ class MainWindow(wx.Frame):
 		self.control.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:#000000,back:#FF0000,bold")
 
 		# Set all the theme settings
-		self.ReadThemeSettings()
 		self.ParseSettings("settings.xml")
 		self.SetStyling()
 
 	# Setting the styles
 	def SetStyling(self):
+		# Set the general foreground and background for normal and python styles
 		pSFore = self.pythonStylesFore
 		pSBack = self.pythonStylesBack
 		nSFore = self.normalStylesFore
 		nSBack = self.normalStylesBack
+
 		# Python styles
 		self.control.StyleSetBackground(stc.STC_STYLE_DEFAULT, nSBack["Main"])
 		self.control.SetSelBackground(True, "#333333")
+
 		# Default
 		self.control.StyleSetSpec(stc.STC_P_DEFAULT, "fore:%s,back:%s" % (pSFore["Default"], pSBack["Default"]))
 		self.control.StyleSetSpec(stc.STC_P_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)
+
 		# Comments
 		self.control.StyleSetSpec(stc.STC_P_COMMENTLINE, "fore:%s,back:%s" % (pSFore["Comment"], pSBack["Comment"]))
 		self.control.StyleSetSpec(stc.STC_P_COMMENTLINE, "face:%(other)s,size:%(size)d" % faces)
+
 		# Number
 		self.control.StyleSetSpec(stc.STC_P_NUMBER, "fore:%s,back:%s" % (pSFore["Number"], pSBack["Number"]))
 		self.control.StyleSetSpec(stc.STC_P_NUMBER, "size:%(size)d" % faces)
+
 		# String
 		self.control.StyleSetSpec(stc.STC_P_STRING, "fore:%s,back:%s" % (pSFore["String"], pSBack["Number"]))
 		self.control.StyleSetSpec(stc.STC_P_STRING, "face:%(helv)s,size:%(size)d" % faces)
+
 		# Single-quoted string
 		self.control.StyleSetSpec(stc.STC_P_CHARACTER, "fore:%s,back:%s" % (pSFore["SingleQuoteString"], pSBack["SingleQuoteString"]))
 		self.control.StyleSetSpec(stc.STC_P_CHARACTER, "face:%(helv)s,size:%(size)d" % faces)
+
 		# Keyword
 		self.control.StyleSetSpec(stc.STC_P_WORD, "fore:%s,back:%s" % (pSFore["Keyword"], pSBack["Keyword"]))
 		self.control.StyleSetSpec(stc.STC_P_WORD, "bold,size:%(size)d" % faces)
+
 		# Triple quotes
 		self.control.StyleSetSpec(stc.STC_P_TRIPLE, "fore:%s,back:%s" % (pSFore["TripleQuote"], pSBack["TripleQuote"]))
 		self.control.StyleSetSpec(stc.STC_P_TRIPLE, "size:%(size)d" % faces)
+
 		# Triple double quotes
 		self.control.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, "fore:%s,back:%s" % (pSFore["TripleDoubleQuote"], pSBack["TripleDoubleQuote"]))
 		self.control.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, "size:%(size)d" % faces)
+
 		# Class name definition
 		self.control.StyleSetSpec(stc.STC_P_CLASSNAME, "fore:%s,back:%s" % (pSFore["ClassName"], pSBack["ClassName"]))
 		self.control.StyleSetSpec(stc.STC_P_CLASSNAME, "bold,underline,size:%(size)d" % faces)
+
 		# Function name definition
 		self.control.StyleSetSpec(stc.STC_P_DEFNAME, "fore:%s,back:%s" % (pSFore["FunctionName"], pSBack["FunctionName"]))
 		self.control.StyleSetSpec(stc.STC_P_DEFNAME, "bold,size:%(size)d" % faces)
+
 		# Operators
 		self.control.StyleSetSpec(stc.STC_P_OPERATOR, "fore:%s,back:%s" % (pSFore["Operator"], pSBack["Operator"]))
 		self.control.StyleSetSpec(stc.STC_P_OPERATOR, "bold,size:%(size)d" % faces)
+
 		# Identifiers
 		self.control.StyleSetSpec(stc.STC_P_IDENTIFIER, "fore:%s,back:%s" % (pSFore["Identifier"], pSBack["Identifier"]))
 		self.control.StyleSetSpec(stc.STC_P_IDENTIFIER, "face:%(helv)s,size:%(size)d" % faces)
+
 		# Comment blocks
 		self.control.StyleSetSpec(stc.STC_P_COMMENTBLOCK, "fore:%s,back:%s" % (pSFore["CommentBlock"], pSBack["CommentBlock"]))
 		self.control.StyleSetSpec(stc.STC_P_COMMENTBLOCK, "size:%(size)d" % faces)
+
 		# End of line where string is not closed
 		self.control.StyleSetSpec(stc.STC_P_STRINGEOL, "fore:%s,back:%s" % (pSFore["StringEOL"], pSBack["StringEOL"]))
 		self.control.StyleSetSpec(stc.STC_P_STRINGEOL, "face:%(mono)s,eol,size:%(size)d" % faces)
+
 		# Caret/Insertion Point
 		self.control.SetCaretForeground(pSFore["Caret"])
 		self.control.SetCaretLineBackground(pSBack["CaretLine"])
 		self.control.SetCaretLineVisible(True)
 
-	# New document
+	# New document menu action
 	def OnNew(self, e):
-		""" Create a new file """
+		# Empty the instance variable for current filename, and the main text box's content
 		self.filename = ""
 		self.control.SetValue("")
 
-	# Open existing document
+	# Open existing document menu action
 	def OnOpen(self, e):
+		# First try opening the existing file; if it fails, the file doesn't exist most likely
 		try:
 			dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.FD_OPEN)
 			if (dlg.ShowModal() == wx.ID_OK):
@@ -286,8 +304,10 @@ class MainWindow(wx.Frame):
 			dlg.ShowModal()
 			dlg.Destroy()
 
-	# Save the document
+	# Save the document menu action
 	def OnSave(self, e):
+		# First try just saving the existing file, but if that file doesn't 
+		# exist it will fail, and the except will launch the Save As.
 		try:
 			f = open(os.path.join(self.dirname, self.filename), 'w')
 			f.write(self.control.GetValue())
@@ -306,7 +326,7 @@ class MainWindow(wx.Frame):
 			except:
 				pass
 
-	# Save a new document
+	# Save a new document menu action
 	def OnSaveAs(self, e):
 		try:
 			dlg = wx.FileDialog(self, "Save file as", self.dirname, self.filename, "*.*", wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -320,35 +340,35 @@ class MainWindow(wx.Frame):
 		except:
 			pass
 
-	# Terminate the program
+	# Terminate the program menu action
 	def OnClose(self, e):
 		self.Close(True)
 
-	# Undo event
+	# Undo event menu action
 	def OnUndo(self, e):
 		self.control.Undo()
 
-	# Redo event
+	# Redo event menu action
 	def OnRedo(self, e):
 		self.control.Redo()
 
-	# Select All text
+	# Select All text menu action
 	def OnSelectAll(self, e):
 		self.control.SelectAll()
 
-	# Copy selected text
+	# Copy selected text menu action
 	def OnCopy(self, e):
 		self.control.Copy()
 
-	# Cut selected text
+	# Cut selected text menu action
 	def OnCut(self, e):
 		self.control.Cut()
 
-	# Paste text from clipboard
+	# Paste text from clipboard menu action
 	def OnPaste(self, e):
 		self.control.Paste()
 
-	# Toggle Line numbers
+	# Toggle Line numbers menu action
 	def OnToggleLineNumbers(self, e):
 		if (self.lineNumbersEnabled):
 			self.control.SetMarginWidth(1,0)
@@ -357,8 +377,9 @@ class MainWindow(wx.Frame):
 			self.control.SetMarginWidth(1, self.leftMarginWidth)
 			self.lineNumbersEnabled = True
 
-	# Show How To
+	# Show How To menu action
 	def OnHowTo(self, e):
+		# Simple display the How To from HowTo.txt in a modal window
 		f = open("HowTo.txt", "r")
 		msg = f.read()
 		f.close()
@@ -366,26 +387,32 @@ class MainWindow(wx.Frame):
 		dlg.ShowModal()
 		dlg.Destroy()
 
-	# Show About
+	# Show About menu action
 	def OnAbout(self, e):
-		dlg = wx.MessageDialog(self, "An elegant, yet simple, text editor made with Python and wxPython.\nCreated by Zachary King.\n02/1/2015\nBeta version 1.0.2\n", "About My Text Editor", wx.OK)
+		# Simple display a modal window telling about the application
+		dlg = wx.MessageDialog(self, "An elegant, yet simple, text editor made with Python and wxPython.\nCreated by Zachary King.\n02/1/2015\nVersion 1.0.5\n", "About My Text Editor", wx.OK)
 		dlg.ShowModal()
 		dlg.Destroy()
 
 	# Update the Line/Col in status bar
 	def UpdateLineCol(self, e):
-			line = self.control.GetCurrentLine() + 1
-			col = self.control.GetColumn(self.control.GetCurrentPos())
-			stat = "Line %s, Column %s" % (line, col)
-			self.StatusBar.SetStatusText(stat, 0)
+		line = self.control.GetCurrentLine() + 1
+		col = self.control.GetColumn(self.control.GetCurrentPos())
+		stat = "Line %s, Column %s" % (line, col)
+		self.StatusBar.SetStatusText(stat, 0)
 
 	# Left mouse up
 	def OnLeftUp(self, e):
+		# This way if you click on another position in the text box
+		# it will update the line/col number in the status bar (like it should)
 		self.UpdateLineCol(self)
 		e.Skip()
 
 	# Char event
 	def OnCharEvent(self, e):
+		# These are keyboard shortcuts.
+		# Some of these are very unstable and
+		# may only work on Windows currently.
 		keycode = e.GetKeyCode()
 		controlDown = e.CmdDown()
 		altDown = e.AltDown()
@@ -410,6 +437,7 @@ class MainWindow(wx.Frame):
 		else:
 			e.Skip()
 
+	# Update the user interface 
 	def OnUpdateUI(self, e):
 		# check for matching braces
 		braceAtCaret = -1
@@ -441,6 +469,7 @@ class MainWindow(wx.Frame):
 		else:
 			self.control.BraceHighlight(braceAtCaret,braceOpposite) 
 
+	# Handles when the margin is clicked (folding)
 	def OnMarginClick(self, e):
 		# fold and unfold as needed
 		if (e.GetMargin() == 2):
@@ -463,6 +492,7 @@ class MainWindow(wx.Frame):
 					else:
 						self.control.ToggleFold(lineClicked)
 
+	# Folds all the blocks of code
 	def FoldAll(self):
 		lineCount = self.control.GetLineCount()
 		expanding = True
@@ -493,7 +523,7 @@ class MainWindow(wx.Frame):
 
 		lineNum = lineNum + 1
 
-
+	# Helper method for expanding a block of code
 	def Expand(self, line, doExpand, force=False, visLevels=0, level=-1):
 		lastChild = self.GetLastChild(line, level)
 		line = line + 1
@@ -530,7 +560,7 @@ class MainWindow(wx.Frame):
 
 		return line
 
-	# Key *press* event bindings
+	# Key press event bindings
 	def OnKeyPressed(self, e):
 		# if the tip is already up, hide it
 		if (self.control.CallTipActive()):
@@ -544,7 +574,7 @@ class MainWindow(wx.Frame):
 			# Small tool tip box
 			if (e.ShiftDown()):
 				self.control.CallTipSetBackground("yellow")
-				self.control.CallTipShow(pos, "Isn't Python cool!?\nYou could put a tip or syntax\nhere that shows your user what\nparameters, etc. go in a function\n")
+				self.control.CallTipShow(pos, "Press <Ctrl> + <Space> for code completion")
 			# Code completion
 			else:
 				kw = keyword.kwlist[:]
@@ -554,8 +584,8 @@ class MainWindow(wx.Frame):
 		else:
 			e.Skip()
 
+	# Parses an XML settings file for styling and configuring the text editor
 	def ParseSettings(self, settings_file):
-		"""Parses an XML settings file for styling and configuring the text editor"""
 		# Open XML document using minidom parser
 		DOMTree = xml.dom.minidom.parse(settings_file)
 		collection = DOMTree.documentElement # Root element
@@ -577,84 +607,6 @@ class MainWindow(wx.Frame):
 					self.pythonStylesBack[str(item)] = str(color)
 				else:
 					self.pythonStylesFore[str(item)] = str(color)
-
-	# Read in theme settings
-	def ReadThemeSettings(self):
-		try:
-			f = open("theme.dat", "r")
-			self.styleBackColor=f.readline().split("=")[1]
-			self.styleSelBackColor=f.readline().split("=")[1]
-			self.styleLineNumberBackColor=f.readline().split("=")[1]
-			self.styleBracelightForeColor=f.readline().split("=")[1]
-			self.styleBraceLightBackColor=f.readline().split("=")[1]
-			self.styleBraceBadForeColor=f.readline().split("=")[1]
-			self.styleBraceBadBackColor=f.readline().split("=")[1]
-			self.pStyleDefaultForeColor=f.readline().split("=")[1]
-			self.pStyleDefaultBackColor=f.readline().split("=")[1]
-			self.pSytleCommentForeColor=f.readline().split("=")[1]
-			self.pStyleCommentBackColor=f.readline().split("=")[1]
-			self.pStyleNumberForeColor=f.readline().split("=")[1]
-			self.pStyleNumberBackColor=f.readline().split("=")[1]
-			self.pStyleStringForeColor=f.readline().split("=")[1]
-			self.pStyleStringBackColor=f.readline().split("=")[1]
-			self.pStyleSingleQuoteStringForeColor=f.readline().split("=")[1]
-			self.pStyleSingleQuoteStringBackColor=f.readline().split("=")[1]
-			self.pStyleKeywordForeColor=f.readline().split("=")[1]
-			self.pStyleKeywordBackColor=f.readline().split("=")[1]
-			self.pStyleTripleQuoteForeColor=f.readline().split("=")[1]
-			self.pStyleTripleQuoteBackColor=f.readline().split("=")[1]
-			self.pStyleTripleDoubleForeColor=f.readline().split("=")[1]
-			self.pStyleTripleDoubleBackColor=f.readline().split("=")[1]
-			self.pStyleClassNameForeColor=f.readline().split("=")[1]
-			self.pStyleClassNameBackColor=f.readline().split("=")[1]
-			self.pStyleFunctionNameForeColor=f.readline().split("=")[1]
-			self.pStyleFunctionNameBackColor=f.readline().split("=")[1]
-			self.pStyleOperatorForeColor=f.readline().split("=")[1]
-			self.pStyleOperatorBackColor=f.readline().split("=")[1]
-			self.pStyleIdentifierForeColor=f.readline().split("=")[1]
-			self.pStyleIdentifierBackColor=f.readline().split("=")[1]
-			
-			self.pStyleCommentBlockForeColor=f.readline().split("=")[1]
-			self.pStyleCommentBlockBackColor=f.readline().split("=")[1]
-			self.pStyleStringEOLForeColor=f.readline().split("=")[1]
-			self.pStyleStringEOLBackColor=f.readline().split("=")[1]
-			f.close()
-		except:
-			self.styleBackColor="#000000"
-			self.styleSelBackColor="#333333"
-			self.styleLineNumberBackColor="#000000"
-			self.styleBracelightForeColor="#000000"
-			self.styleBraceLightBackColor="#000000"
-			self.styleBraceBadForeColor="#000000"
-			self.styleBraceBadBackColor="#000000"
-			self.pStyleDefaultForeColor="#000000"
-			self.pStyleDefaultBackColor="#000000"
-			self.pSytleCommentForeColor="#626C67"
-			self.pStyleCommentBackColor="#000000"
-			self.pStyleNumberForeColor="#FF3C41"
-			self.pStyleNumberBackColor="#000000"
-			self.pStyleStringForeColor="#00C677"
-			self.pStyleStringBackColor="#000000"
-			self.pStyleSingleQuoteStringForeColor="#00C677"
-			self.pStyleSingleQuoteStringBackColor="#000000"
-			self.pStyleKeywordForeColor="#FF3C41"
-			self.pStyleKeywordBackColor="#000000"
-			self.pStyleTripleQuoteForeColor="#00C677"
-			self.pStyleTripleQuoteBackColor="#000000"
-			self.pStyleTripleDoubleForeColor="#00C677"
-			self.pStyleTripleDoubleBackColor="#000000"
-			self.pStyleClassNameForeColor="#76F5E6"
-			self.pStyleClassNameBackColor="#000000"
-			self.pStyleFunctionNameForeColor="#00CACA"
-			self.pStyleFunctionNameBackColor="#000000"
-			self.pStyleOperatorForeColor="#FF3C41"
-			self.pStyleOperatorBackColor="#000000"
-			self.pStyleIdentifierForeColor="#FFFFFF"
-			self.pStyleIdentifierBackColor="#000000"
-			self.pStyleCommentBlockForeColor="#626C67"
-			self.pStyleCommentBlockBackColor="#000000"
-			self.pStyleStringEOLForeColor="#FFFFFF"
-			self.pStyleStringEOLBackColor="#000000"
 
 
 app = wx.App(False)
