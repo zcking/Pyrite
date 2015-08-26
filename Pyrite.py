@@ -1,8 +1,8 @@
 #!/usr/bin/python
 ###
-#	copyright (2015) Zachary King
+#	Copyright (2015) Zachary King
 #	Pyrite
-#	Beta v1.0.2
+#	Version 1.0.5
 ###
 
 import wx
